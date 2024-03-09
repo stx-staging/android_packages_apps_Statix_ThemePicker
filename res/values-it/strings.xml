@@ -15,17 +15,9 @@
 -->
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- The name of this application, a theme picker. [CHAR LIMIT=50] -->
-    <string name="app_name">Stile e sfondi</string>
-
     <string name="icon_pack_title">Stile delle icone</string>
     <string name="icon_preview_card_content_description">Anteprima icone</string>
 
     <string name="font_title">Carattere</string>
     <string name="font_preview_card_content_description">Anteprima del carattere</string>
-
-    <string name="wallpaper_color_tab">Colori di sfondo</string>
-    <string name="wallpaper_color_title">Colore dello sfondo</string>
-    <string name="preset_color_tab">Colori di base</string>
-    <string name="color_changed">Colore modificato</string>
 </resources>
