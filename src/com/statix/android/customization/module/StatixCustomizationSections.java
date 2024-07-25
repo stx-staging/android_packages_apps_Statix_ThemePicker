@@ -9,7 +9,6 @@ import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.android.customization.model.grid.GridOptionsManager;
-import com.android.customization.model.theme.OverlayManagerCompat;
 import com.android.customization.model.themedicon.ThemedIconSectionController;
 import com.android.customization.model.themedicon.ThemedIconSwitchProvider;
 import com.android.customization.model.themedicon.domain.interactor.ThemedIconInteractor;
@@ -104,29 +103,30 @@ public final class StatixCustomizationSections implements CustomizationSections 
             DisplayUtils displayUtils,
             CustomizationPickerViewModel customizationPickerViewModel,
             WallpaperInteractor wallpaperInteractor,
-	    WallpaperManager wallpaperManager,
-	    boolean isTwoPaneAndSmallWidth) {
+            WallpaperManager wallpaperManager,
+            boolean isTwoPaneAndSmallWidth) {
         List<CustomizationSectionController<?>> sectionControllers = new ArrayList<>();
+
         // Wallpaper section.
         sectionControllers.add(
                 mFlags.isCustomClocksEnabled(activity)
                         ? new PreviewWithClockCarouselSectionController(
-                                activity,
-                                lifecycleOwner,
-                                screen,
-                                wallpaperInfoFactory,
-                                wallpaperColorsRepository,
-                                displayUtils,
-                                mClockCarouselViewModelFactory,
-                                mClockViewFactory,
-                                wallpaperPreviewNavigator,
-                                sectionNavigationController,
-                                wallpaperInteractor,
-                                mThemedIconInteractor,
-                                mColorPickerInteractor,
-                                wallpaperManager,
-                                isTwoPaneAndSmallWidth,
-                                customizationPickerViewModel)
+                        activity,
+                        lifecycleOwner,
+                        screen,
+                        wallpaperInfoFactory,
+                        wallpaperColorsRepository,
+                        displayUtils,
+                        mClockCarouselViewModelFactory,
+                        mClockViewFactory,
+                        wallpaperPreviewNavigator,
+                        sectionNavigationController,
+                        wallpaperInteractor,
+                        mThemedIconInteractor,
+                        mColorPickerInteractor,
+                        wallpaperManager,
+                        isTwoPaneAndSmallWidth,
+                        customizationPickerViewModel)
                         : new PreviewWithThemeSectionController(
                                 activity,
                                 lifecycleOwner,
@@ -141,22 +141,26 @@ public final class StatixCustomizationSections implements CustomizationSections 
                                 wallpaperManager,
                                 isTwoPaneAndSmallWidth,
                                 customizationPickerViewModel));
+
         sectionControllers.add(
                 new ConnectedSectionController(
                         // Theme color section.
                         new ColorSectionController(
                                 sectionNavigationController,
-                                new ViewModelProvider(activity, mColorPickerViewModelFactory)
+                                new ViewModelProvider(
+                                        activity,
+                                        mColorPickerViewModelFactory)
                                         .get(ColorPickerViewModel.class),
                                 lifecycleOwner),
                         // Wallpaper quick switch section.
                         new WallpaperQuickSwitchSectionController(
                                 customizationPickerViewModel.getWallpaperQuickSwitchViewModel(
-					screen),
+                                        screen),
                                 lifecycleOwner,
                                 sectionNavigationController,
-				savedInstanceState == null),
+                                savedInstanceState == null),
                         /* reverseOrderWhenHorizontal= */ true));
+
         switch (screen) {
             case LOCK_SCREEN:
                 // Lock screen quick affordances section.
@@ -164,20 +168,24 @@ public final class StatixCustomizationSections implements CustomizationSections 
                         new KeyguardQuickAffordanceSectionController(
                                 sectionNavigationController,
                                 new ViewModelProvider(
-                                                activity,
-                                                mKeyguardQuickAffordancePickerViewModelFactory)
+                                        activity,
+                                        mKeyguardQuickAffordancePickerViewModelFactory)
                                         .get(KeyguardQuickAffordancePickerViewModel.class),
                                 lifecycleOwner));
+
                 // Notifications section.
                 sectionControllers.add(
                         new NotificationSectionController(
                                 new ViewModelProvider(
-                                                activity, mNotificationSectionViewModelFactory)
+                                        activity,
+                                        mNotificationSectionViewModelFactory)
                                         .get(NotificationSectionViewModel.class),
                                 lifecycleOwner));
+
                 // More settings section.
                 sectionControllers.add(new MoreSettingsSectionController());
                 break;
+
             case HOME_SCREEN:
                 // Themed app icon section.
                 sectionControllers.add(
@@ -187,6 +195,7 @@ public final class StatixCustomizationSections implements CustomizationSections 
                                 savedInstanceState,
                                 mThemedIconSnapshotRestorer,
                                 mThemesUserEventLogger));
+
                 // App grid section.
                 sectionControllers.add(
                         new GridSectionController(
@@ -196,17 +205,18 @@ public final class StatixCustomizationSections implements CustomizationSections 
                                 /* isRevampedUiEnabled= */ true));
                 break;
         }
-        // Icon pack selection section.
-        sectionControllers.add(
-                new IconPackSectionController(
-                        IconPackManager.getInstance(activity, new OverlayManagerCompat(activity)),
-                        sectionNavigationController));
+                // Icon pack selection section.
+                sectionControllers.add(
+                        new IconPackSectionController(
+                                IconPackManager.getInstance(activity, new OverlayManagerCompat(activity)),
+                                sectionNavigationController));
 
-        // Font selection section.
-        sectionControllers.add(
-                new FontSectionController(
-                        FontManager.getInstance(activity, new OverlayManagerCompat(activity)),
-                        sectionNavigationController));
+                // Font selection section.
+                sectionControllers.add(
+                        new FontSectionController(
+                                FontManager.getInstance(activity, new OverlayManagerCompat(activity)),
+                                sectionNavigationController));
+
         return sectionControllers;
     }
 }
