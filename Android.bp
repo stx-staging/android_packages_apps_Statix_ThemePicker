@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2022 StatiXOS
+// Copyright (C) 2022-2024 StatiXOS
 // SPDX-License-Identifer: Apache-2.0
 //
 
@@ -20,11 +20,15 @@ license {
     ],
 }
 
-filegroup {
-    name: "StatixThemePicker_srcs",
+java_library {
+    name: "StatixThemePickerOverridesLib",
     srcs: [
-        "src/**/*.java",
-        "src/**/*.kt",
+        "src_override/**/*.java",
+        "src_override/**/*.kt",
+    ],
+    libs: [
+        "hilt_android",
+        "StatixThemePickerLib",
     ],
 }
 
@@ -35,28 +39,65 @@ filegroup {
     ],
 }
 
-genrule {
-    name: "StatixThemePicker_res",
-    tools: ["soong_zip"],
-    srcs: [
-        "res/**/*"
+android_library {
+    name: "StatixThemePickerLib",
+
+    static_libs: [
+        "guava",
+        "monet",
+        "renderscript_toolkit",
+        "WallpaperPicker2Lib",
+        "SettingsLibSettingsTheme",
+        "SystemUI-statsd",
+        "styleprotoslite",
+        "androidx.lifecycle_lifecycle-livedata-ktx",
+        "androidx.lifecycle_lifecycle-runtime-ktx",
+        "androidx.lifecycle_lifecycle-viewmodel-ktx",
+        "androidx.recyclerview_recyclerview",
+        "SystemUICustomizationLib",
+        "ThemePickerLib",
+        "hilt_android",
     ],
-    out: ["StatixThemePicker_res.zip"],
-    cmd: "INPUTS=($(in)) && "
-        + "RES_DIR=$$(dirname $$(dirname $${INPUTS[0]})) && "
-        + "$(location soong_zip) -o $(out) -C $$RES_DIR -D $$RES_DIR"
+
+    srcs: [
+        "src/**/*.java",
+        "src/**/*.kt",
+    ],
+
+    resource_dirs: [
+        "res",
+        "res_override",
+    ],
+
+    manifest: "AndroidManifest-empty.xml",
 }
 
-genrule {
-    name: "StatixThemePicker_res_overrides",
-    tools: ["soong_zip"],
-    srcs: [
-        "res_override/**/*",
+java_defaults {
+    name: "StatixThemePicker_defaults",
+    static_libs: [
+        "StatixThemePickerLib",
+        "StatixThemePickerOverridesLib",
+        "ThemePickerLib",
+        "ThemePickerOverridesLib",
+        "hilt_android",
     ],
-    out: ["ThemePicker_res_overrides.zip"],
-    cmd: "INPUTS=($(in)) && "
-        + "RES_DIR=$$(dirname $$(dirname $${INPUTS[0]})) && "
-        + "$(location soong_zip) -o $(out) -C $$RES_DIR -D $$RES_DIR"
+
+    jni_libs: [
+        "librenderscript-toolkit",
+    ],
+
+    required: ["android.software.theme_picker.xml"],
+
+    use_embedded_native_libs: true,
+
+    optimize: {
+        enabled: false,
+    },
+    kotlincflags: ["-Xjvm-default=all"],
+    certificate: "",
+
+    privileged: true,
+    system_ext_specific: true,
 }
 
 //
@@ -64,48 +105,12 @@ genrule {
 //
 android_app {
     name: "StatixThemePicker",
+    defaults: ["StatixThemePicker_defaults"],
 
-    static_libs: [
-        "guava",
-        "hilt_android",
-        "monet",
-        "renderscript_toolkit",
-        "wallpaper-common-deps",
-        "SettingsLibSettingsTheme",
-        "SystemUI-statsd",
-        "styleprotoslite",
-    ],
-
-    srcs: [
-        ":WallpaperPicker2_srcs",
-        ":ThemePicker_srcs",
-        ":StatixThemePicker_srcs",
-        "src_override/**/*.java",
-        "src_override/**/*.kt",
-    ],
-
-    jni_libs: [
-        "librenderscript-toolkit",
-    ],
-
-    use_embedded_native_libs: true,
-
-    resource_zips: [":WallpaperPicker2_res", ":ThemePicker_res", ":StatixThemePicker_res", ":StatixThemePicker_res_overrides"],
-
-    optimize: {
-        enabled: false,
-    },
-    kotlincflags: ["-Xjvm-default=enable"],
-    certificate: "platform",
-
-    privileged: true,
-    system_ext_specific: true,
     platform_apis: true,
     manifest: "AndroidManifest.xml",
     additional_manifests: [":WallpaperPicker2_Manifest", ":ThemePicker_Manifest"],
-
-    overrides: ["ThemePicker", "WallpaperPicker2", "WallpaperPicker"],
-
+    overrides: ["ThemePicker", "WallpaperPicker", "WallpaperPicker2"],
     required: [
         "privapp_whitelist_com.android.wallpaper",
         "default_permissions_com.android.wallpaper",

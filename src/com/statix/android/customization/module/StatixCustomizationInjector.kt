@@ -2,12 +2,12 @@ package com.statix.android.customization.module
 
 import android.content.Context
 import androidx.activity.ComponentActivity
-import androidx.fragment.app.Fragment
 import com.android.customization.module.ThemePickerInjector
+import com.android.customization.module.logging.ThemesUserEventLogger
 import com.android.customization.picker.notifications.ui.viewmodel.NotificationSectionViewModel
-import com.android.wallpaper.dispatchers.BackgroundDispatcher
-import com.android.wallpaper.dispatchers.MainDispatcher
 import com.android.wallpaper.module.CustomizationSections
+import com.android.wallpaper.picker.di.modules.BackgroundDispatcher
+import com.android.wallpaper.picker.di.modules.MainDispatcher
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineDispatcher
@@ -17,35 +17,38 @@ import kotlinx.coroutines.CoroutineScope
 open class StatixCustomizationInjector @Inject constructor(
     @MainDispatcher mainScope: CoroutineScope,
     @MainDispatcher mainDispatcher: CoroutineDispatcher,
+    @BackgroundDispatcher bgScope: CoroutineScope,
     @BackgroundDispatcher bgDispatcher: CoroutineDispatcher,
 ) : ThemePickerInjector(
     mainScope,
-    mainDispatcher,
     bgDispatcher,
 ) {
 
   private var customizationSections: CustomizationSections? = null
 
   override fun getCustomizationSections(activity: ComponentActivity): CustomizationSections {
-    val wallpaperColorsViewModel = getWallpaperColorsViewModel()
+    val appContext = activity.applicationContext
+    val clockViewFactory = getClockViewFactory(activity)
+    val resources = activity.resources
     return customizationSections
         ?: StatixCustomizationSections(
                 getColorPickerViewModelFactory(
-                    context = activity,
-                    wallpaperColorsViewModel = wallpaperColorsViewModel,
+                    context = appContext,
+                    wallpaperColorsRepository = getWallpaperColorsRepository(),
                 ),
-                getKeyguardQuickAffordancePickerInteractor(activity),
-                getKeyguardQuickAffordancePickerViewModelFactory(activity),
-                getNotificationSectionViewModelFactory(activity),
+                getKeyguardQuickAffordancePickerViewModelFactory(appContext),
+                getNotificationSectionViewModelFactory(appContext),
                 getFlags(),
                 getClockCarouselViewModelFactory(
-                    getClockPickerInteractor(activity.applicationContext),
+                    interactor = getClockPickerInteractor(appContext),
+		    clockViewFactory = clockViewFactory,
+		    resources = resources,
                 ),
-                getClockViewFactory(activity),
-                getDarkModeSnapshotRestorer(activity),
-                getThemedIconSnapshotRestorer(activity),
+                clockViewFactory,
+                getThemedIconSnapshotRestorer(appContext),
                 getThemedIconInteractor(),
-                getColorPickerInteractor(activity, wallpaperColorsViewModel),
+                getColorPickerInteractor(appContext, getWallpaperColorsRepository()),
+		getUserEventLogger(),
             )
             .also { customizationSections = it }
   }
